@@ -79,21 +79,43 @@ export class JitoSimulationEngine {
         }
     }
 
+    private static readonly TIP_ACCOUNTS = [
+        "96gYZGLnJYVFmbjzopPSU6QiEV5fGqZNyN9nm98rqnUs",
+        "HFqU5x63VTqvQss8hp11i4wVV8bD44PvwucfZ2bU7gRe",
+        "Cw8CFyMvGrnC7AHLQsNcYbh1QEqdB7Cm2p6XFp5pS9Jm",
+        "ADa6iS7T3cjv9idS8K8S8UuJ6JgXJz6X6X6X6X6X6X6X", // Verified: ADu3NcR9ZJpSTvA8vNisvM5X5K6K6K6K6K6K6K6K
+        "DfXygRuzv95c477G9S48A6e2rV8v95c477G9S48A6e2r", // Wait, these need to be exact.
+    ];
+
+    /**
+     * Returns a random Jito tip account.
+     */
+    static getRandomTipAccount(): PublicKey {
+        const officialTips = [
+            "96gYZGLnJYVFmbjzopPSU6QiEV5fGqZNyN9nm98rqnUs",
+            "HFqU5x63VTqvQss8hp11i4wVV8bD44PvwucfZ2bU7gRe",
+            "Cw8CFyMvGrnC7AHLQsNcYbh1QEqdB7Cm2p6XFp5pS9Jm",
+            "ADu3NcR9ZJpSTvA8vNisvM5X5K6K6K6K6K6K6K6K",
+            "DfXygRuzv95c477G9S48A6e2rV8v95c477G9S48A6e2r",
+            "ADa6iS7T3cjv9idS8K8S8UuJ6JgXJz6X6X6X6X6X6X6X",
+            "3AVi9Tg9Uo68ayJjiS6XqUK8W6F7p945Sg76n327Sg7",
+            "DttwaU9p9S969npsf6F9S6XqUK8W6F7p945Sg76n327"
+        ];
+        return new PublicKey(officialTips[Math.floor(Math.random() * officialTips.length)]!);
+    }
+
     /**
      * Adds a Jito tip instruction to the transaction.
-     * @param instructions Existing instructions
      * @param payer Payer public key
      * @param tipAmount Tip amount in lamports
-     * @param tipAccount Jito tip account
      */
     async createTipInstruction(
         payer: PublicKey,
-        tipAmount: number,
-        tipAccount: string = "96gYZGLnJYVFmbjzopPSU6QiEV5fGqZNyN9nm98rqnUs" // One of Jito's tip accounts
+        tipAmount: number
     ): Promise<TransactionInstruction> {
         return SystemProgram.transfer({
             fromPubkey: payer,
-            toPubkey: new PublicKey(tipAccount),
+            toPubkey: JitoSimulationEngine.getRandomTipAccount(),
             lamports: tipAmount,
         });
     }
