@@ -2,6 +2,7 @@
   "name": "vanguard-1",
   "version": "1.0.0",
   "description": "Vanguard-1 provides the \"Second Line of Defense\" for the Solana AI Agent ecosystem. It ensures that agents operate within Institutional Risk Guardrails, preventing fee-bleed, MEV attacks, and rogue behavior.",
+  "type": "module",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -12,6 +13,8 @@
   "dependencies": {
     "@solana/web3.js": "^1.98.4",
     "@types/node": "^25.2.0",
+    "axios": "^1.13.4",
+    "bs58": "^6.0.0",
     "dotenv": "^17.2.3",
     "solana-agent-kit": "^2.0.10",
     "ts-node": "^10.9.2",
