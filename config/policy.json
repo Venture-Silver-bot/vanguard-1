@@ -1,0 +1,6 @@
+{
+  "slippage_tolerance_bps": 50,
+  "jito_tip_mode": "Dynamic",
+  "jito_tip_cap_lamports": 1000000,
+  "evidence_logging_level": "Strict"
+}
