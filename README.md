@@ -38,14 +38,21 @@ Think of Vanguard-1 as a **Race Engineer** sitting in the pit wall.
 
 ## Architecture
 
-```mermaid
-graph TD
-    A[Agent Decision] -->|Proposal| B(Vanguard-1 Risk Layer)
-    B --> C{Atomic Abort (Jito)}
-    C -->|Fail| D[Drop Bundle (Zero Cost)]
-    C -->|Pass| E{Slippage Sentinel (Jupiter)}
-    E -->|High Impact| F[Reject Trade]
-    E -->|Safe| G[Sign & Submit]
+```text
+[Agent Decision]
+      |
+      v
+(Vanguard-1 Risk Layer)
+      |
+      +---> {Jito Simulation}
+      |           |
+      |           +---> (Fail) ---> [Drop Bundle / Zero Cost]
+      |
+      +---> {Slippage Sentinel (Jupiter)}
+                    |
+                    +---> (High Impact) ---> [Reject Trade]
+                    |
+                    +---> (Safe) ---> [Sign & Submit]
 ```
 
 ## Integration Guide (How it Works)
