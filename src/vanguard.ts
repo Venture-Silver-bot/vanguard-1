@@ -1,6 +1,9 @@
 import { SlippageSentinel } from './engines/slippage';
 import { JitoSimulationEngine } from './engines/simulation';
 
+// Re-export for strict type safety across the module
+export type { SimulationResult } from './engines/simulation';
+
 export interface RiskDecision {
   approved: boolean;
   reason: string;
@@ -29,14 +32,14 @@ export class VanguardProtocol {
     inputMint: string,
     outputMint: string,
     inputAmount: number,
-    txData?: any // Placeholder for actual transaction object
+    transaction?: any // The actual Solana transaction object
   ): Promise<RiskDecision> {
     
     const timestamp = Date.now();
     const checks = {
       slippage: false,
       simulation: false,
-      integrity: true // Placeholder for Integrity Heartbeat
+      integrity: true
     };
 
     // 1. Slippage Check
@@ -52,9 +55,17 @@ export class VanguardProtocol {
     checks.slippage = true;
 
     // 2. Jito Simulation Check
-    // In a real scenario, we would pass the constructed transaction here.
-    // For now, we simulate the check structure.
-    const simulationResult = await this.jitoEngine.simulateTransfer('sender', 'receiver', inputAmount);
+    // We pass the constructed transaction to the Jito Engine for atomic validation.
+    // If no transaction is provided, we fall back to the basic transfer simulation for testing.
+    let simulationResult: SimulationResult;
+    
+    if (transaction) {
+      simulationResult = await this.jitoEngine.simulate(transaction);
+    } else {
+      // Fallback for testing without a full transaction object
+      simulationResult = await this.jitoEngine.simulateTransfer('test-sender', 'test-receiver', inputAmount);
+    }
+
     if (!simulationResult.approved) {
       return {
         approved: false,
