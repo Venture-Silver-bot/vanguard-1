@@ -22,6 +22,20 @@ AI Agents on Solana operate with "Optimistic Execution," leading to:
 ### The Solution
 Vanguard-1 acts as a "Second Line of Defense." It validates every transaction against a deterministic policy before it hits the blockchain.
 
+## Problem & Solution (Non-Technical)
+
+### The Problem
+AI agents on Solana are fast, but they can be reckless. They often:
+1.  **Burn Gas:** Paying transaction fees for trades that fail (e.g., hitting a honeypot or insufficient liquidity).
+2.  **Buy the Top:** Trading with high slippage, resulting in worse execution prices than expected.
+3.  **Rogue Behavior:** Executing trades that violate the user's risk tolerance without approval.
+
+### The Solution: The "Pit Wall" Engineer
+Think of Vanguard-1 as a **Race Engineer** sitting in the pit wall.
+*   **Before** the race (trade), the engineer checks the track conditions (Slippage) and the car's setup (Transaction Simulation).
+*   **If** the check fails, the engineer radios the driver to **STOP**.
+*   **Result:** The car saves fuel (Gas), avoids crashes (Failed Trades), and finishes the race with the intended strategy.
+
 ## Architecture
 
 ```mermaid
@@ -33,6 +47,44 @@ graph TD
     E -->|High Impact| F[Reject Trade]
     E -->|Safe| G[Sign & Submit]
 ```
+
+## Integration Guide (How it Works)
+
+Vanguard-1 is designed to be dropped into an existing **TypeScript/JavaScript** Solana trading bot. It acts as a middleware layer.
+
+### 1. The Pipeline
+1.  **Agent Decision:** Your bot decides to make a trade.
+2.  **Proposal:** Your bot passes the trade details to Vanguard-1.
+3.  **Validation:** Vanguard-1 checks the trade against Jito (Simulation) and Jupiter (Slippage).
+4.  **Decision:** If safe, Vanguard-1 returns `approved: true`. If unsafe, it returns `approved: false` and a reason.
+5.  **Execution:** Your bot either executes the trade or safely aborts based on Vanguard-1's decision.
+
+### 2. How to Integrate
+Developers can integrate Vanguard-1 by wrapping their existing transaction logic:
+
+```typescript
+import { VanguardProtocol } from './src/vanguard';
+
+const vanguard = new VanguardProtocol();
+
+async function trade(inputMint, outputMint, amount, transaction) {
+  // Step 1: Ask Vanguard if this trade is safe
+  const decision = await vanguard.validateProposal(inputMint, outputMint, amount, transaction);
+
+  if (decision.approved) {
+    console.log("✅ Vanguard Approved. Proceeding to blockchain.");
+    // Your existing on-chain execution logic here
+  } else {
+    console.log(`❌ Vanguard Blocked: ${decision.reason}`);
+    // Safe abort logic
+  }
+}
+```
+
+### 3. Technical Specifications
+*   **RPC Requirements:** Requires access to a Jito Block Engine RPC (for simulation) and standard Solana RPC (for balance checks).
+*   **Latency:** Vanguard-1 adds ~100-200ms latency to the decision cycle (negligible for swing trading, critical for HFT to validate integrity).
+*   **Security:** All validation logic is deterministic. No external dependencies are required at runtime beyond standard RPCs.
 
 ## Core Engines
 
